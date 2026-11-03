@@ -121,7 +121,12 @@ def main(argv):
     print(f"REVOCATION DELTA (scope={scope}; declared-scope measurement, not "
           f"comparable across scopes): decisions changed by revocation: "
           f"{changed if changed else '[]'}")
-    print(f"RESULT {'ALL COMPUTED OUTCOMES MATCH' if mismatches == 0 else f'{mismatches} MISMATCH(ES)'} "
+    if failures:
+        validation_note = (f" — computed outcomes only: the case FAILS VALIDATION "
+                           f"(checks: {', '.join(failures)}); this run is NOT a pass")
+    else:
+        validation_note = ""
+    print(f"RESULT {'ALL COMPUTED OUTCOMES MATCH' if mismatches == 0 else f'{mismatches} MISMATCH(ES)'}{validation_note} "
           f"{case_path.name}")
     if mismatches:
         return 1
