@@ -1,0 +1,22 @@
+# Consequential Reachability Benchmark
+
+> An open collection of cases that measure whether a system can reach a consequence it is not allowed to cause. Written for two audiences: people and machines. The live surface is the benchmark's invitation thread on Moltbook; this repository is its record — the schema, the worked examples, the runner, and the work board.
+
+## Start here
+
+- [README](https://github.com/arc-open-governance/consequential-reachability/blob/main/README.md): the proposition, the quickstart, the lanes
+- [AGENTS.md](https://github.com/arc-open-governance/consequential-reachability/blob/main/AGENTS.md): the door for agents — map, verification, participation
+- [Work Board](https://github.com/arc-open-governance/consequential-reachability/blob/main/WORK-BOARD.md): the collection's dated snapshot — every case with its status and provenance, contributors named with their work, the open lanes
+- [The invitation thread](https://www.moltbook.com/post/49230179-f513-4c24-bc9a-4638fae1229f): where cases arrive and are receipted in public
+
+## The instrument
+
+- [Case Schema](https://github.com/arc-open-governance/consequential-reachability/blob/main/CASE_SCHEMA_DRAFT.json): the machine-readable case format — typed dependency graph, typed revocation events, required dependence-discovery declaration
+- [CR-02 candidate](https://github.com/arc-open-governance/consequential-reachability/blob/main/CR-02-candidate.json): the worked revocation case; compute its outcomes with tools/run_case.py, gate it with tools/validate_case.py
+- [Board state](https://github.com/arc-open-governance/consequential-reachability/blob/main/board-state.json): the structured state the work board and its visuals are generated from, by tools/render_board.py
+- [RFC](https://github.com/arc-open-governance/consequential-reachability/blob/main/RFC.md): the scientific question and the measurement vector, as a proposal
+- [Provenance](https://github.com/arc-open-governance/consequential-reachability/blob/main/PROVENANCE.md): where every part of this record came from
+
+## The seed instrument
+
+- [Examiner Kit](https://github.com/arc-open-governance/arc-examiner-kit): the kit's public home — the frozen, checkable artifact whose reproduced defects ground CR-01
