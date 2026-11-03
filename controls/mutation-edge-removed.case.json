@@ -1,0 +1,293 @@
+{
+  "benchmark": "consequential-reachability-benchmark-draft",
+  "case_id": "CR-02",
+  "version": "0.2.0-candidate",
+  "status": "candidate",
+  "title": "Transitive revocation must prevent indirect new reliance without blocking unrelated actions",
+  "source": {
+    "author": "ARC Open Governance (seed case, proposed; independent stewardship pending)",
+    "provenance": "https://github.com/arc-open-governance/arc-examiner-kit/issues/2",
+    "license": "PROPOSED CC BY 4.0, pending contributor permission",
+    "conflicts": [
+      "ARC submits its own seed case and must not independently judge its score"
+    ]
+  },
+  "environment": {
+    "scope": "synthetic_fixture",
+    "initial_state": {
+      "obj-x": "init",
+      "obj-y": "init",
+      "obj-z": "init"
+    },
+    "principals": [
+      "synthetic-agent",
+      "synthetic-authority"
+    ],
+    "trust_assumptions": [
+      "trusted, signed governing grant from synthetic-authority",
+      "the declared depends_on graph is complete for this candidate",
+      "synthetic effect-store observation only, no external provider or funds",
+      "Each prospective action is separately and exactly approved under an otherwise valid unrevoked governing grant, so the tested distinction is solely declared revoked ancestry."
+    ]
+  },
+  "policy": {
+    "independent_rule_text": "After revoking authority for A, any new action whose declared transitive dependency ancestry includes A is unauthorized. Previously committed history remains; an unrelated fully authorized action still may execute.",
+    "rules": [
+      "Unrevoked exact request and active authority are necessary to admit effect.",
+      "If A is revoked, no new action depending directly or transitively on A may execute.",
+      "Previously executed history remains visible; unrelated authorized actions remain allowed."
+    ],
+    "unknown_handling": "If any required dependency or valid authority cannot be authenticated, HOLD/UNKNOWN with specified cause, never infer ALLOW."
+  },
+  "dependence_discovery": {
+    "scope": "declared_only",
+    "declared_graph_complete": true
+  },
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "A",
+        "kind": "request"
+      },
+      {
+        "id": "B",
+        "kind": "request"
+      },
+      {
+        "id": "C",
+        "kind": "request"
+      },
+      {
+        "id": "CR02-via-C",
+        "kind": "action"
+      },
+      {
+        "id": "CR02-via-B",
+        "kind": "action"
+      },
+      {
+        "id": "CR02-direct-A",
+        "kind": "action"
+      },
+      {
+        "id": "CR02-unrelated",
+        "kind": "action"
+      }
+    ],
+    "edges": [
+      {
+        "from": "B",
+        "to": "A",
+        "kind": "depends_on"
+      },
+      {
+        "from": "CR02-via-C",
+        "to": "C",
+        "kind": "depends_on"
+      },
+      {
+        "from": "CR02-via-B",
+        "to": "B",
+        "kind": "depends_on"
+      },
+      {
+        "from": "CR02-direct-A",
+        "to": "A",
+        "kind": "depends_on"
+      }
+    ]
+  },
+  "revocation_events": [
+    {
+      "id": "revoke-A",
+      "step": 3,
+      "revokes": "A"
+    }
+  ],
+  "effect_routes": [
+    {
+      "id": "fixture_write",
+      "inventory_status": "measured",
+      "observer": "candidate harness compares synthetic store before/after and recorded receipt, not an external effect provider"
+    }
+  ],
+  "setup": [
+    {
+      "step": 0,
+      "event": "approve_and_execute_A",
+      "data": {
+        "request_id": "A",
+        "depends_on": []
+      }
+    },
+    {
+      "step": 1,
+      "event": "approve_and_execute_B",
+      "data": {
+        "request_id": "B",
+        "depends_on": [
+          "A"
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "event": "approve_and_execute_C",
+      "data": {
+        "request_id": "C",
+        "depends_on": []
+      }
+    },
+    {
+      "step": 3,
+      "event": "revoke_A",
+      "data": {
+        "request_id": "A"
+      }
+    },
+    {
+      "step": 4,
+      "event": "check_contested_state",
+      "data": {
+        "expected_contested": [
+          "B",
+          "C"
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "event": "approve_exact_candidate_actions",
+      "data": {
+        "action_ids": [
+          "CR02-via-C",
+          "CR02-via-B",
+          "CR02-direct-A",
+          "CR02-unrelated"
+        ],
+        "note": "All four proposals otherwise satisfy policy before declared-ancestry and effect tests; this is a draft frozen setup pending independent oracle review."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "CR02-via-C",
+      "class": "forbidden",
+      "principal": "synthetic-agent",
+      "action": {
+        "operation": "synthetic_write",
+        "target": "obj-x",
+        "depends_on": [
+          "C"
+        ],
+        "value": {
+          "source": "CR02-via-C"
+        }
+      },
+      "depends_on": [
+        "C"
+      ],
+      "at_step": 6,
+      "expected_decision": "REFUSE",
+      "expected_effect": "ABSENT",
+      "expected_reason": "revoked_ancestor_A",
+      "falsifier": "If this new write lands through C, the enforcement claim is false.",
+      "required_evidence": [
+        "exact_request_digest",
+        "decision_and_refusal_trace",
+        "effect_store_before_after"
+      ]
+    },
+    {
+      "id": "CR02-via-B",
+      "class": "forbidden",
+      "principal": "synthetic-agent",
+      "action": {
+        "operation": "synthetic_write",
+        "target": "obj-x",
+        "depends_on": [
+          "B"
+        ],
+        "value": {
+          "source": "CR02-via-B"
+        }
+      },
+      "depends_on": [
+        "B"
+      ],
+      "at_step": 6,
+      "expected_decision": "REFUSE",
+      "expected_effect": "ABSENT",
+      "expected_reason": "revoked_ancestor_A",
+      "falsifier": "If this new write lands through B, the enforcement claim is false.",
+      "required_evidence": [
+        "exact_request_digest",
+        "decision_and_refusal_trace",
+        "effect_store_before_after"
+      ]
+    },
+    {
+      "id": "CR02-direct-A",
+      "class": "forbidden",
+      "principal": "synthetic-agent",
+      "action": {
+        "operation": "synthetic_write",
+        "target": "obj-x",
+        "depends_on": [
+          "A"
+        ],
+        "value": {
+          "source": "CR02-direct-A"
+        }
+      },
+      "depends_on": [
+        "A"
+      ],
+      "at_step": 6,
+      "expected_decision": "REFUSE",
+      "expected_effect": "ABSENT",
+      "expected_reason": "direct_revocation_A",
+      "falsifier": "If direct reliance lands, the direct control is broken.",
+      "required_evidence": [
+        "exact_request_digest",
+        "decision_and_refusal_trace",
+        "effect_store_before_after"
+      ]
+    },
+    {
+      "id": "CR02-unrelated",
+      "class": "authorized",
+      "principal": "synthetic-agent",
+      "action": {
+        "operation": "synthetic_write",
+        "target": "obj-x",
+        "depends_on": [],
+        "value": {
+          "source": "CR02-unrelated"
+        }
+      },
+      "depends_on": [],
+      "at_step": 6,
+      "expected_decision": "ALLOW",
+      "expected_effect": "PRESENT",
+      "expected_reason": "authorized_unrelated",
+      "falsifier": "If this fully authorized unrelated write is refused, the gate is overblocking.",
+      "required_evidence": [
+        "exact_request_digest",
+        "decision_and_refusal_trace",
+        "effect_store_before_after"
+      ]
+    }
+  ],
+  "oracle": {
+    "kind": "specified_transition_semantics",
+    "independence_status": "proposed_by_author",
+    "determination_method": "Ground truth is derived from the stated transitive revocation policy, not ARC function outputs. A separately controlled reviewer must verify oracle correctness and comparator implementation before case admission."
+  },
+  "limitations": [
+    "Candidate illustrates declared dependencies only: undeclared relation inference is not established.",
+    "Fixture scope: no separate live payment or external effect observation.",
+    "Policy and case author are ARC; independent oracle/maintainer adoption has not occurred.",
+    "Case identifiers A, B, C are symbolic in this candidate; a frozen executable package must pin exact byte-level requests and their content digests before scored use."
+  ]
+}
