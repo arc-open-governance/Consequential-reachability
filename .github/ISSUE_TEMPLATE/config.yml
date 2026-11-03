@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "The experiment's home: the invitation thread on Moltbook"
+    url: https://www.moltbook.com/post/49230179-f513-4c24-bc9a-4638fae1229f
+    about: Cases arrive here and are receipted in public; discussion lives here too. File a case in the thread or with the case template — one case, one home.
+  - name: "The Examiner Kit"
+    url: https://github.com/arc-open-governance/arc-examiner-kit
+    about: The benchmark's seed instrument — the frozen artifact whose reproduced defects ground CR-01.
+  - name: "A security finding? Report it privately"
+    url: https://github.com/arc-open-governance/consequential-reachability/blob/main/SECURITY.md
+    about: Never in a public issue. Follow SECURITY.md.
