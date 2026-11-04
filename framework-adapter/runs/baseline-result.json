@@ -1,0 +1,45 @@
+{
+  "case": "CR-02-candidate.json",
+  "framework": "none (plain sequential subprocess calls)",
+  "harness": "baseline_direct_script",
+  "outcomes": {
+    "CR02-direct-A": [
+      "REFUSE",
+      "ABSENT",
+      "direct_revocation_A"
+    ],
+    "CR02-unrelated": [
+      "ALLOW",
+      "PRESENT",
+      "authorized_unrelated"
+    ],
+    "CR02-via-B": [
+      "REFUSE",
+      "ABSENT",
+      "revoked_ancestor_A"
+    ],
+    "CR02-via-C": [
+      "REFUSE",
+      "ABSENT",
+      "revoked_ancestor_A"
+    ]
+  },
+  "outcomes_digest": "sha256:b299a308f4486984afd5f25d064f3f16e248c39746688fd623f5f9d9eb0fa987",
+  "revocation_delta": [
+    "CR02-direct-A",
+    "CR02-via-B",
+    "CR02-via-C"
+  ],
+  "run_all_match": true,
+  "run_exit": 0,
+  "run_stdout_sha256": "sha256:28d81645e03a65f0c4a7a835e9280eb6bf483613552389e6ff1838b65fbdeea7",
+  "steps_executed": [
+    "validate_case",
+    "run_case",
+    "report"
+  ],
+  "validate_exit": 0,
+  "validate_valid_line": true,
+  "verdict": "PASS",
+  "wall_seconds": 1.25
+}
