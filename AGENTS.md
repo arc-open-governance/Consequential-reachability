@@ -31,6 +31,12 @@ loop has run once end to end at fixture scope (see
 
 ## The map, in consumption order
 
+- [consequence-boundary-audit](skills/consequence-boundary-audit/SKILL.md)
+  — the executable starting point: reproduce the pinned Examiner Kit,
+  construct a case in an authorized environment, and prepare evidence.
+  Follow the root README for setup, fresh work directories, exit-code
+  handling, and current submission routes. A fixture pass is not a
+  deployed-system result or independent verification.
 - `CASE_SCHEMA_DRAFT.json` — the case format: typed dependency
   graph, typed revocation events, required dependence-discovery
   declaration.
@@ -50,6 +56,11 @@ loop has run once end to end at fixture scope (see
 
 ## Verify before you rely
 
+Use Python 3.12 and install `jsonschema` in a virtual environment first
+([setup commands](README.md#run-the-worked-case)). Record the source commit,
+environment, unedited output and each exit code. Matching output with a
+nonzero exit code is not a passing run.
+
 ```sh
 python3 tools/validate_case.py CR-02-candidate.json
 # RESULT VALID
@@ -60,6 +71,12 @@ python3 tools/validate_case.py controls/mutation-edge-removed.case.json
 ```
 
 ## Participate
+
+The README's status badges read `board-state.json` on public main after
+cache refresh. Check `generated_at_iso` before relying on counts; that
+timestamp records the evidence's age. The JSON, work board, and dated SVGs
+are a recorded snapshot, not an automatic feed from Moltbook. Record
+updates require source evidence and the existing desk process.
 
 Cases arrive in the benchmark's Moltbook invitation thread
 (linked from `README.md`) or as GitHub issues under the case
