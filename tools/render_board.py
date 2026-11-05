@@ -95,6 +95,9 @@ def render_board(state):
         "merit. (Founder's decision, Nov 2, 2026.)"
     )
     lines.append("")
+    for note in state.get("press", {}).get("head_notes", []):
+        lines.append(note)
+        lines.append("")
     lines.append(
         f"**The experiment's home:** the live thread on {thr['platform']} — "
         f"[{thr['title']}]({thr['url']}) (post `{thr['post_id']}`). "
@@ -106,12 +109,23 @@ def render_board(state):
     lines.append("")
     w = state["window"]
     frac = window_fraction(state, parse_ts(state["generated_at_iso"]))
-    lines.append(
-        f"- {w['label']}\n"
-        f"- At this snapshot the window stands **{frac * 100:.1f}% elapsed**.\n"
+    gen_ts = parse_ts(state["generated_at_iso"])
+    if gen_ts >= parse_ts(w["closes"]):
+        status = (
+            f"- At this snapshot the window is **closed** (it closed "
+            f"{w['closes_label']}); collection for this window has ended."
+        )
+    else:
+        status = (
+            f"- At this snapshot the window stands **{frac * 100:.1f}% "
+            "elapsed; collection still open**"
+            f" (the window closes {w['closes_label']})."
+        )
+    counts = state.get("counts_line") or (
         f"- Cases in the collection: **{len(cases)}** "
         f"(CR-01–CR-{len(cases):02d})."
     )
+    lines.append(f"- {w['label']}\n{status}\n{counts}")
     lines.append("")
     lines.append("## Cases")
     lines.append("")
@@ -150,12 +164,12 @@ def render_board(state):
         lines.append("")
     lines.append("## Fixtures")
     lines.append("")
-    lines.append(
+    lines.append(state.get("fixtures_statement") or (
         f"**Runnable fixtures: {state['fixtures_runnable']}.** No case "
         "in the collection has been turned into a runnable fixture "
         "yet. That is named open work below — the fixture lane is "
         "where a case becomes something an examiner can run."
-    )
+    ))
     lines.append("")
     lines.append("## Contributors")
     lines.append("")
@@ -181,6 +195,9 @@ def render_board(state):
         "request like everything else here."
     )
     lines.append("")
+    for section in state.get("press", {}).get("log_sections", []):
+        lines.append(section)
+        lines.append("")
     return "\n".join(lines)
 
 
@@ -218,7 +235,9 @@ def render_timeline(state):
         f'<text x="60" y="66" fill="{DIM}" font-size="13" '
         f'font-family="Helvetica, Arial, sans-serif">'
         f"State as of {esc(state['generated_at_label'])} · source: the "
-        f"engagement record · gold = landed · blue = the window still open</text>"
+        f"engagement record · gold = landed · blue = "
+        + ("the close" if gen >= closes else "the window still open")
+        + "</text>"
     )
     # axis
     out.append(
@@ -236,41 +255,47 @@ def render_timeline(state):
             f'font-size="11" text-anchor="{anchor}" '
             f'font-family="Helvetica, Arial, sans-serif">{lab} PST</text>'
         )
-    # now line
-    xn = x(gen)
+    # now line (clamped to the axis; after the close it marks the close)
+    closed = gen >= closes
+    xn = min(x(gen), x1)
+    now_label = "window closed" if closed else "this snapshot"
     out.append(
         f'<line x1="{xn:.1f}" y1="86" x2="{xn:.1f}" y2="{axis_y}" '
         f'stroke="{BLUE}" stroke-width="1.5" stroke-dasharray="4 3">'
         f'<animate attributeName="stroke-dashoffset" from="14" to="0" '
         f'dur="2.4s" repeatCount="indefinite"/></line>'
-        f'<text x="{xn + 8:.1f}" y="98" fill="{BLUE}" font-size="11" '
-        f'font-family="Helvetica, Arial, sans-serif">this snapshot</text>'
+        f'<text x="{xn - 8 if closed else xn + 8:.1f}" y="98" fill="{BLUE}" '
+        f'font-size="11" text-anchor="{"end" if closed else "start"}" '
+        f'font-family="Helvetica, Arial, sans-serif">{now_label}</text>'
     )
-    # case markers, labels fanned upward in arrival order
-    levels = [150, 118, 150, 118, 86]
-    for i, c in enumerate(cases):
+    # case markers; labels stacked in a column with leader lines, so
+    # arrivals minutes apart stay legible
+    ordered = sorted(cases, key=lambda c: c["provenance"]["timestamp_iso"])
+    lx = max(x(parse_ts(ordered[-1]["provenance"]["timestamp_iso"])) + 48, 160)
+    row0, step = 96, 22
+    for i, c in enumerate(ordered):
         ts = parse_ts(c["provenance"]["timestamp_iso"])
         xx = x(ts)
-        ly = levels[i % len(levels)]
+        ly = row0 + i * step
         color = STATUS_COLORS.get(c["status"], GOLD)
         out.append(
-            f'<line x1="{xx:.1f}" y1="{ly + 14}" x2="{xx:.1f}" '
-            f'y2="{axis_y}" stroke="{color}" stroke-width="1" opacity="0.65"/>'
+            f'<polyline points="{xx:.1f},{axis_y - 6} {xx:.1f},{ly - 4} '
+            f'{lx - 6:.1f},{ly - 4}" fill="none" stroke="{color}" '
+            f'stroke-width="1" opacity="0.55"/>'
             f'<circle cx="{xx:.1f}" cy="{axis_y}" r="6" fill="{color}">'
             + (
                 '<animate attributeName="r" values="6;8.5;6" dur="2.6s" '
                 'repeatCount="indefinite"/>'
-                if i == len(cases) - 1
+                if i == len(ordered) - 1
                 else ""
             )
             + "</circle>"
-            f'<text x="{xx:.1f}" y="{ly}" fill="{INK}" font-size="13" '
-            f'font-weight="bold" text-anchor="middle" '
-            f'font-family="Helvetica, Arial, sans-serif">{c["id"]}</text>'
-            f'<text x="{xx:.1f}" y="{ly + 14}" fill="{DIM}" font-size="10.5" '
-            f'text-anchor="middle" '
+            f'<text x="{lx:.1f}" y="{ly}" font-size="13" '
             f'font-family="Helvetica, Arial, sans-serif">'
-            f'{esc(c["provenance"]["short_time_label"])} · {esc(c["status"])}</text>'
+            f'<tspan fill="{INK}" font-weight="bold">{c["id"]}</tspan>'
+            f'<tspan fill="{DIM}" font-size="11"> · '
+            f'{esc(c["provenance"]["short_time_label"])} PST · '
+            f'{esc(c["status"])}</tspan></text>'
         )
     out.append("</svg>")
     return "".join(out)
@@ -290,7 +315,8 @@ def render_progress(state):
         f'font-size="20">The collection window</text>'
         f'<text x="860" y="40" fill="{GOLD}" font-size="15" '
         f'text-anchor="end" font-family="Helvetica, Arial, sans-serif">'
-        f"{pct:.1f}% elapsed at this snapshot</text>"
+        + ("window closed · 100%" if frac >= 1 else f"{pct:.1f}% elapsed at this snapshot")
+        + "</text>"
     )
     out.append(
         f'<rect x="{bx}" y="58" width="{bw}" height="22" rx="11" '
@@ -303,7 +329,8 @@ def render_progress(state):
     out.append(
         f'<text x="60" y="106" fill="{DIM}" font-size="12" '
         f'font-family="Helvetica, Arial, sans-serif">'
-        f"Opened {esc(w['opens_label'])} · closes {esc(w['closes_label'])} · "
+        f"Opened {esc(w['opens_label'])} · "
+        f"{'closed' if frac >= 1 else 'closes'} {esc(w['closes_label'])} · "
         f"state as of {esc(state['generated_at_label'])}</text>"
         f'<text x="60" y="128" fill="{DIM}" font-size="12" '
         f'font-family="Helvetica, Arial, sans-serif">'
