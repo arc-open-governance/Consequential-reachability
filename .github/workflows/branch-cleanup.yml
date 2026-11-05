@@ -18,11 +18,11 @@ jobs:
       - name: Delete merged branches with this surface's prefixes
         env: { GH_TOKEN: "${{ github.token }}", REPO: "${{ github.repository }}" }
         run: |
-          match() { case "$1" in site/*|board/*|surface/web-visual*|surface/claude-web-visual*) return 0;; *) return 1;; esac; }
-          gh api --paginate "repos/$REPO/pulls?state=closed&per_page=100" --jq ".[]|select(.merged_at!=null)|.head.ref" | sort -u | while read b; do
+          match() { case "$1" in site/*|board/*|surface/web-visual*|surface/claude-web-visual*|live-watch) return 0;; *) return 1;; esac; }
+          (gh api --paginate "repos/$REPO/pulls?state=closed&per_page=100" --jq ".[]|select(.merged_at!=null)|.head.ref" | sort -u; echo live-watch) | sort -u | while read b; do
             match "$b" || continue
             if gh api "repos/$REPO/git/ref/heads/$b" >/dev/null 2>&1; then
               open=$(gh api "repos/$REPO/pulls?state=open&head=${REPO%%/*}:$b" --jq length)
-              [ "$open" = "0" ] && gh api -X DELETE "repos/$REPO/git/refs/heads/$b" && echo "deleted $b"
+              if [ "$open" = "0" ]; then gh api -X DELETE "repos/$REPO/git/refs/heads/$b" >/dev/null && echo "deleted $b" || true; fi
             fi
           done
