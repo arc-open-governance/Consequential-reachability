@@ -1,0 +1,27 @@
+{
+  "package": "grsi-examiner-package-2026-11-05",
+  "built": "2026-11-05",
+  "claim": "none \u2014 record at the auditor's grading; makes certification possible, does not certify itself",
+  "files": [
+    {
+      "path": "grsi-improvement-register-2026-11-03.md",
+      "bytes": 51840,
+      "sha256": "6bf1e34552b83b43eede3461177569ccd00b02ea709cd5f30edda9366ee12af2"
+    },
+    {
+      "path": "census-three-claim-2026-11-05.md",
+      "bytes": 15336,
+      "sha256": "618fb2d807c68e83e2db73fe5a04e28c41679537390c5d9789b011e86d14c6fe"
+    },
+    {
+      "path": "lane-c-instrument-design-2026-11-05.md",
+      "bytes": 6279,
+      "sha256": "4d87cb8156dfca7d937cb66717d1df712c69fa91d4d869e0f919c8762b1d47e2"
+    },
+    {
+      "path": "EVIDENCE-INDEX.md",
+      "bytes": 3638,
+      "sha256": "c76fde820988b84b54a5f0ef4904eeb2cf3260100cc7543cde76c9e1eec434f5"
+    }
+  ]
+}
