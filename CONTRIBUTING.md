@@ -50,6 +50,38 @@ own check — stands open to any of them.
   where the record settles: the schema, the case files, and
   dated board snapshots land here by pull request.
 
+## Maintaining the public record
+
+`board-state.json` is the source for collection counts and provenance. The
+README's dynamic JSON badges read it from public main; the case and
+contributor counts are array lengths, and the fixture count and record
+timestamp are explicit fields. No number is copied into a static badge.
+
+When the record changes:
+
+1. Follow the desk's existing receipt and examination process. Record the
+   source, standing and next action; do not turn receipt into acceptance.
+2. Update `board-state.json` and its `generated_at_iso` and
+   `generated_at_label` to the time of the evidenced record update. Do not
+   advance the timestamp merely to make an old record appear fresh.
+3. Run `python3 tools/render_board.py` from the repository root. Review
+   `WORK-BOARD.md` and all three generated SVGs beside the source change.
+   Commit them together. The generator does not edit this README or fetch
+   new evidence.
+4. Confirm the badges' source values and their timestamp after publication.
+   Shields and GitHub image caches can delay what a reader sees; the
+   requested cache lifetime is 300 seconds, not a freshness guarantee.
+
+Badge rendering is external to this repository. If it is unavailable,
+`board-state.json` and `WORK-BOARD.md` remain readable without that service.
+The larger SVGs remain dated snapshots and are linked as such. No scheduled
+workflow, GitHub Actions run, scraper, or new status authority is required.
+
+`fixtures_runnable` is the desk's recorded fixture count. Do not infer it
+from a schema-valid case or an unrelated adapter run. Before changing it,
+name the implemented case, runnable artifact and evidence at the scope
+being counted.
+
 ## Terms
 
 Synthetic or explicitly authorized environments only. No live

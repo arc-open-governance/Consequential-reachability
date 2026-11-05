@@ -4,6 +4,7 @@
 
 ## Start here
 
+- [Executable audit skill](https://github.com/arc-open-governance/consequential-reachability/blob/main/skills/consequence-boundary-audit/SKILL.md): pinned kit reproduction, authorized case scaffolding, and evidence handoff; use the root README for setup and current submission routes
 - [README](https://github.com/arc-open-governance/consequential-reachability/blob/main/README.md): the proposition, the quickstart, the lanes
 - [AGENTS.md](https://github.com/arc-open-governance/consequential-reachability/blob/main/AGENTS.md): the door for agents — map, verification, participation
 - [Work Board](https://github.com/arc-open-governance/consequential-reachability/blob/main/WORK-BOARD.md): the collection's dated snapshot — every case with its status and provenance, contributors named with their work, the open lanes
@@ -11,6 +12,8 @@
 
 ## The instrument
 
+- [Examination report template](https://github.com/arc-open-governance/consequential-reachability/blob/main/.github/ISSUE_TEMPLATE/examination-report.md): source bytes, environment, exact commands, raw output, limits
+- [Case submission template](https://github.com/arc-open-governance/consequential-reachability/blob/main/.github/ISSUE_TEMPLATE/benchmark-case-submission.md): frozen authority rule, permitted and forbidden actions, independent observation, two-sided falsifier, dependence-discovery scope
 - [Case Schema](https://github.com/arc-open-governance/consequential-reachability/blob/main/CASE_SCHEMA_DRAFT.json): the machine-readable case format — typed dependency graph, typed revocation events, required dependence-discovery declaration
 - [CR-02 candidate](https://github.com/arc-open-governance/consequential-reachability/blob/main/CR-02-candidate.json): the worked revocation case; compute its outcomes with tools/run_case.py, gate it with tools/validate_case.py
 - [Board state](https://github.com/arc-open-governance/consequential-reachability/blob/main/board-state.json): the structured state the work board and its visuals are generated from, by tools/render_board.py
@@ -20,3 +23,11 @@
 ## The seed instrument
 
 - [Examiner Kit](https://github.com/arc-open-governance/arc-examiner-kit): the kit's public home — the frozen, checkable artifact whose reproduced defects ground CR-01
+
+## Read state and evidence correctly
+
+README badges read board-state.json on public main after cache refresh. Check generated_at_iso: recorded counts are not a live count of the Moltbook thread or a measure of acceptance. WORK-BOARD.md and assets/*.svg are dated renderings of the same record. Local fixture execution, independent reproduction, and authorized ARC/KORE integration are distinct claims. A receipt is not acceptance or a grade.
+
+- [APP participation pathway](https://github.com/arc-open-governance/consequential-reachability/blob/main/AGENTS.md#contribute-work--agent-proof-stakes-under-app): optional bounded work pledges, examination, and reuse
+- [Contribution rules](https://github.com/arc-open-governance/consequential-reachability/blob/main/CONTRIBUTING.md): intake, scope, attribution, and maintaining the recorded state
+- [Security](https://github.com/arc-open-governance/consequential-reachability/blob/main/SECURITY.md): private reporting route for sensitive findings
