@@ -1,0 +1,28 @@
+name: Clean up merged web-visual branches
+# Deletes branches this surface created (site/, board/, surface/web-visual*, surface/claude-web-visual*) once their PR is merged.
+# Other surfaces' branches are never touched.
+on:
+  pull_request:
+    types: [closed]
+  push:
+    branches: ["main"]
+    paths: [".github/workflows/branch-cleanup.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged branches with this surface's prefixes
+        env: { GH_TOKEN: "${{ github.token }}", REPO: "${{ github.repository }}" }
+        run: |
+          match() { case "$1" in site/*|board/*|surface/web-visual*|surface/claude-web-visual*) return 0;; *) return 1;; esac; }
+          gh api --paginate "repos/$REPO/pulls?state=closed&per_page=100" --jq ".[]|select(.merged_at!=null)|.head.ref" | sort -u | while read b; do
+            match "$b" || continue
+            if gh api "repos/$REPO/git/ref/heads/$b" >/dev/null 2>&1; then
+              open=$(gh api "repos/$REPO/pulls?state=open&head=${REPO%%/*}:$b" --jq length)
+              [ "$open" = "0" ] && gh api -X DELETE "repos/$REPO/git/refs/heads/$b" && echo "deleted $b"
+            fi
+          done
