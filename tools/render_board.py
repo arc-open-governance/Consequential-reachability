@@ -345,10 +345,10 @@ def render_map(state):
     people = state["map"]["people"]   # [{id,label,x,y}]
     cases = state["map"]["cases"]     # [{id,label,x,y}]
     edges = state["map"]["edges"]     # [{from,to,label,kind}]
-    W, H = 920, 460
+    W, H = 920, 484
     pos = {}
     for n in people + cases:
-        pos[n["id"]] = (n["x"], n["y"])
+        pos[n["id"]] = (n["x"], n["y"] + 22)
     out = [svg_open(W, H, "The benchmark's relational map: contributors, cases, interactions")]
     out.append(
         f'<text x="60" y="42" fill="{INK}" font-family="Georgia, serif" '
@@ -356,20 +356,56 @@ def render_map(state):
         f'<text x="60" y="66" fill="{DIM}" font-size="13" '
         f'font-family="Helvetica, Arial, sans-serif">'
         f"State as of {esc(state['generated_at_label'])} · every edge is an "
-        f"interaction in the record · gold = contribution and landing · "
+        f"interaction in the record</text>"
+        f'<text x="60" y="84" fill="{DIM}" font-size="13" '
+        f'font-family="Helvetica, Arial, sans-serif">'
+        f"gold = contribution and landing · "
         f"blue = the desk's governed hand: receipts, answers, asks</text>"
     )
+    # Edges are drawn as gentle curves; a reciprocal pair bends to opposite
+    # sides, and each label is placed at the first spot along its curve that
+    # overlaps no node and no earlier label (so labels never collide).
+    import math
+    boxes = [(x - 40, y - 24, x + 40, y + 18) for (x, y) in pos.values()]
+    def hits(b):
+        return any(not (b[2] < o[0] or b[0] > o[2] or b[3] < o[1] or b[1] > o[3]) for o in boxes)
+    pairs = {(e["from"], e["to"]) for e in edges}
     for e in edges:
         (ax, ay), (bx, by) = pos[e["from"]], pos[e["to"]]
         color = GOLD if e["kind"] == "contribution" else BLUE
-        mx, my = (ax + bx) / 2, (ay + by) / 2 - 8
+        dx, dy = bx - ax, by - ay
+        length = math.hypot(dx, dy) or 1.0
+        nx, ny = -dy / length, dx / length
+        bend = 26 if (e["to"], e["from"]) in pairs else 10
+        if (e["to"], e["from"]) in pairs and e["from"] > e["to"]:
+            bend = -bend
+        cx, cy = (ax + bx) / 2 + nx * bend, (ay + by) / 2 + ny * bend
         out.append(
-            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" '
+            f'<path d="M{ax},{ay} Q{cx:.1f},{cy:.1f} {bx},{by}" fill="none" '
             f'stroke="{color}" stroke-width="1.4" opacity="0.8">'
             f'<animate attributeName="opacity" values="0.45;0.9;0.45" '
-            f'dur="5s" repeatCount="indefinite"/></line>'
-            f'<text x="{mx}" y="{my}" fill="{DIM}" font-size="10.5" '
-            f'text-anchor="middle" '
+            f'dur="5s" repeatCount="indefinite"/></path>'
+        )
+        w = 5.6 * len(e["label"]) + 6
+        spot = None
+        for t in (0.5, 0.42, 0.58, 0.34, 0.66, 0.26, 0.74):
+            px = (1 - t) ** 2 * ax + 2 * (1 - t) * t * cx + t * t * bx
+            py = (1 - t) ** 2 * ay + 2 * (1 - t) * t * cy + t * t * by
+            for off in (0, -12, 12, -24, 24, -36, 36):
+                lx, ly = px + nx * off, py + ny * off - 4
+                box = (lx - w / 2, ly - 10, lx + w / 2, ly + 3)
+                if not hits(box):
+                    spot = (lx, ly, box)
+                    break
+            if spot:
+                break
+        if spot is None:
+            lx, ly = cx, cy - 4
+            spot = (lx, ly, (lx - w / 2, ly - 10, lx + w / 2, ly + 3))
+        boxes.append(spot[2])
+        out.append(
+            f'<text x="{spot[0]:.1f}" y="{spot[1]:.1f}" fill="{DIM}" font-size="10.5" '
+            f'text-anchor="middle" paint-order="stroke" stroke="#0B0F1A" stroke-width="3" '
             f'font-family="Helvetica, Arial, sans-serif">{esc(e["label"])}</text>'
         )
     for n in people:
